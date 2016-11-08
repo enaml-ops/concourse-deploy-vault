@@ -1,6 +1,6 @@
-# concourse-deploy-cloudfoundry
+# concourse-deploy-vault
 
-Deploy Cloud Foundry with [omg](https://github.com/enaml-ops) in a Concourse pipeline.
+Deploy VAULT with [omg](https://github.com/enaml-ops) in a Concourse pipeline.
 
 ## Prerequisites
 

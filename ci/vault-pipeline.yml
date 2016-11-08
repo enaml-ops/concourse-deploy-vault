@@ -47,7 +47,7 @@ resources:
     ca_cert: {{bosh-cacert}}
     client_id: {{bosh-client-id}}
     client_secret: {{bosh-client-secret}}
-    deployment: vault 
+    deployment: {{deployment-name}} 
     target: {{bosh-url}}
 - name: slack
   type: slack-notification
@@ -90,21 +90,21 @@ jobs:
           source:
             repository: virtmerlin/deploy-worker
         run:
-          path: concourse-deploy-cloudfoundry/ci/oss-tasks/generate-manifest.sh
+          path: concourse-deploy-vault/ci/tasks/deploy-vault.sh 
         params:
-          SKIP_HAPROXY: {{skip-haproxy}}
-          BOSH_CLIENT: {{bosh-client-id}}
-          BOSH_CLIENT_SECRET: {{bosh-client-secret}}
-          BOSH_CACERT: {{bosh-cacert}}
+          BOSH_DOMAIN: {{bosh-url}}
+          BOSH_USER: {{bosh-user}}
+          BOSH_PASSWORD: {{bosh-pass}}
           CLOUD_CONFIG_PLUGIN: {{cloud-config-plugin}}
           PRODUCT_PLUGIN: {{product-plugin}}
-          VAULT_ADDR: {{vault-addr}}
-          VAULT_HASH_IP: {{vault-hash-ip}}
-          VAULT_HASH_HOSTVARS: {{vault-hash-hostvars}}
-          VAULT_HASH_KEYCERT: {{vault-hash-keycert}}
-          VAULT_HASH_MISC: {{vault-hash-misc}}
-          VAULT_HASH_PASSWORD: {{vault-hash-password}}
-          VAULT_TOKEN: {{vault-token}}
+          VAULT_IP: {{vault-ip}}
+          STEMCELL_VERSION: {{stemcell-version}}
+          STEMCELL_NAME: {{stemcell-name}}
+          NET_NAME: {{net-name}}
+          AZ_NAME: {{az-name}}
+          VM_SIZE: {{vm-size}}
+          DISK_TYPE: {{disk-type}}
+          OMG_PATH: omg-cli/omg-linux
         inputs:
         - name: vault-release
         - name: consul-release

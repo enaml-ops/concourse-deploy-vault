@@ -1,0 +1,143 @@
+groups:
+- name: all
+  jobs:
+  - deploy
+- name: deploy
+  jobs:
+  - deploy
+
+resources:
+- name: vault-release
+  type: bosh-io-release
+  check_every: 1h
+  source:
+    repository: cloudfoundry-community/vault-boshrelease
+- name: consul-release
+  type: bosh-io-release
+  check_every: 1h
+  source:
+    repository: cloudfoundry-community/consul-boshrelease
+- name: stemcell
+  type: bosh-io-stemcell
+  check_every: 1h
+  source:
+    force_regular: true
+    name: {{stemcell-name}}
+- name: concourse-deploy-vault
+  type: git
+  check_every: 1h
+  source:
+    uri: https://github.com/enaml-ops/concourse-deploy-vault
+    branch: master
+- name: omg-cli
+  type: github-release
+  check_every: 1h
+  source:
+    user: enaml-ops
+    repository: omg-cli
+- name: omg-product-bundle
+  type: github-release
+  check_every: 1h
+  source:
+    user: enaml-ops
+    repository: omg-product-bundle
+- name: {{deployment-name}}
+  type: bosh-deployment
+  source:
+    ca_cert: {{bosh-cacert}}
+    client_id: {{bosh-client-id}}
+    client_secret: {{bosh-client-secret}}
+    deployment: vault 
+    target: {{bosh-url}}
+- name: slack
+  type: slack-notification
+  source:
+    url: {{slack-url}}
+
+resource_types:
+- name: slack-notification
+  type: docker-image
+  source:
+    repository: cfcommunity/slack-notification-resource
+
+jobs:
+- name: deploy
+  plan:
+    - aggregate:
+      - get: vault-release
+        trigger: true
+      - get: consul-release
+        trigger: true
+      - get: stemcell
+        trigger: true
+      - get: concourse-deploy-vault
+        trigger: true
+      - get: omg-cli
+        trigger: true
+        params:
+          globs:
+          - omg-linux
+      - get: omg-product-bundle
+        trigger: true
+        params:
+          globs:
+          - vault-plugin-linux
+    - task: generate-manifest
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: virtmerlin/deploy-worker
+        run:
+          path: concourse-deploy-cloudfoundry/ci/oss-tasks/generate-manifest.sh
+        params:
+          SKIP_HAPROXY: {{skip-haproxy}}
+          BOSH_CLIENT: {{bosh-client-id}}
+          BOSH_CLIENT_SECRET: {{bosh-client-secret}}
+          BOSH_CACERT: {{bosh-cacert}}
+          CLOUD_CONFIG_PLUGIN: {{cloud-config-plugin}}
+          PRODUCT_PLUGIN: {{product-plugin}}
+          VAULT_ADDR: {{vault-addr}}
+          VAULT_HASH_IP: {{vault-hash-ip}}
+          VAULT_HASH_HOSTVARS: {{vault-hash-hostvars}}
+          VAULT_HASH_KEYCERT: {{vault-hash-keycert}}
+          VAULT_HASH_MISC: {{vault-hash-misc}}
+          VAULT_HASH_PASSWORD: {{vault-hash-password}}
+          VAULT_TOKEN: {{vault-token}}
+        inputs:
+        - name: vault-release
+        - name: consul-release
+        - name: stemcell
+        - name: concourse-deploy-vault
+        - name: omg-cli
+        - name: omg-product-bundle
+        outputs:
+        - name: manifest
+          path: ""
+    - put: {{deployment-name}}
+      params:
+        manifest: manifest/deployment.yml
+        stemcells:
+        - stemcell/*.tgz
+        releases:
+        - vault-release/*.tgz
+        - consul-release/*.tgz
+      on_success:
+        put: slack
+        params:
+          text: |
+            :white_check_mark: Successfully deployed {{deployment-name}} CF
+            <https://$ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+          channel: {{slack-channel}}
+          username: {{slack-username}}
+          icon_url: {{slack-icon-url}}
+      on_failure:
+        put: slack
+        params:
+          text: |
+            :x: FAILED to deploy {{deployment-name}} CF
+            <https://$ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+          channel: {{slack-channel}}
+          username: {{slack-username}}
+          icon_url: {{slack-icon-url}}

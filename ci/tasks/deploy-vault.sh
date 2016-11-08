@@ -58,17 +58,25 @@ if [ -z "$CLOUD_CONFIG_PLUGIN" ]; then
     exit 1
 fi
 
-$OMG_PATH deploy-product \
---bosh-url https://${BOSH_DOMAIN} \
---bosh-port 25555 \
---bosh-user ${BOSH_USER} \
---bosh-pass ${BOSH_PASSWORD} \
---ssl-ignore \
-$PRODUCT_PLUGIN \
---ip ${VAULT_IP} \
---az ${AZ_NAME} \
---network ${NET_NAME} \
---vm-type ${VM_SIZE} \
---disk-type ${DISK_TYPE} \
---stemcell-ver ${STEMCELL_VERSION} \
---stemcell-name ${STEMCELL_NAME} 
+
+chmod +x ${OMG_PATH}
+
+${OMG_PATH} register-plugin \
+  --type product \
+  --pluginpath omg-product-bundle/${PRODUCT_PLUGIN}
+
+
+${OMG_PATH} deploy-product \
+  --bosh-url https://${BOSH_DOMAIN} \
+  --bosh-port 25555 \
+  --bosh-user ${BOSH_USER} \
+  --bosh-pass ${BOSH_PASSWORD} \
+  --ssl-ignore \
+${PRODUCT_PLUGIN} \
+  --ip ${VAULT_IP} \
+  --az ${AZ_NAME} \
+  --network ${NET_NAME} \
+  --vm-type ${VM_SIZE} \
+  --disk-type ${DISK_TYPE} \
+  --stemcell-ver ${STEMCELL_VERSION} \
+  --stemcell-name ${STEMCELL_NAME} 

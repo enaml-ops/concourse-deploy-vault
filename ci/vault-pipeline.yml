@@ -81,7 +81,7 @@ jobs:
         trigger: true
         params:
           globs:
-          - vault-plugin-linux
+          - {{product-plugin}}
     - task: generate-manifest
       config:
         platform: linux
@@ -95,7 +95,6 @@ jobs:
           BOSH_DOMAIN: {{bosh-url}}
           BOSH_USER: {{bosh-user}}
           BOSH_PASSWORD: {{bosh-pass}}
-          CLOUD_CONFIG_PLUGIN: {{cloud-config-plugin}}
           PRODUCT_PLUGIN: {{product-plugin}}
           VAULT_IP: {{vault-ip}}
           STEMCELL_VERSION: {{stemcell-version}}
@@ -127,7 +126,7 @@ jobs:
         put: slack
         params:
           text: |
-            :white_check_mark: Successfully deployed {{deployment-name}} CF
+            :white_check_mark: Successfully deployed {{deployment-name}} Vault 
             <https://$ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
           channel: {{slack-channel}}
           username: {{slack-username}}
@@ -136,7 +135,7 @@ jobs:
         put: slack
         params:
           text: |
-            :x: FAILED to deploy {{deployment-name}} CF
+            :x: FAILED to deploy {{deployment-name}} Vault 
             <https://$ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
           channel: {{slack-channel}}
           username: {{slack-username}}

@@ -53,11 +53,6 @@ if [ -z "$OMG_PATH" ]; then
     exit 1
 fi
 
-if [ -z "$CLOUD_CONFIG_PLUGIN" ]; then
-    echo "Need to set CLOUD_CONFIG_PLUGIN"
-    exit 1
-fi
-
 
 chmod +x ${OMG_PATH}
 
@@ -67,10 +62,11 @@ ${OMG_PATH} register-plugin \
 
 
 ${OMG_PATH} deploy-product \
-  --bosh-url https://${BOSH_DOMAIN} \
+  --bosh-url ${BOSH_DOMAIN} \
   --bosh-port 25555 \
   --bosh-user ${BOSH_USER} \
   --bosh-pass ${BOSH_PASSWORD} \
+  --print-manifest \
   --ssl-ignore \
 ${PRODUCT_PLUGIN} \
   --ip ${VAULT_IP} \
@@ -79,4 +75,4 @@ ${PRODUCT_PLUGIN} \
   --vm-type ${VM_SIZE} \
   --disk-type ${DISK_TYPE} \
   --stemcell-ver ${STEMCELL_VERSION} \
-  --stemcell-name ${STEMCELL_NAME} 
+  --stemcell-name ${STEMCELL_NAME}  > manifest/deployment.yml

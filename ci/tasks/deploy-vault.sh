@@ -28,8 +28,8 @@ if [ -z "$STEMCELL_VERSION" ]; then
     exit 1
 fi
 
-if [ -z "$STEMCELL_NAME" ]; then
-    echo "Need to set STEMCELL_NAME"
+if [ -z "$STEMCELL_OS" ]; then
+    echo "Need to set STEMCELL_OS"
     exit 1
 fi
 
@@ -75,4 +75,4 @@ ${PRODUCT_PLUGIN} \
   --vm-type ${VM_SIZE} \
   --disk-type ${DISK_TYPE} \
   --stemcell-ver ${STEMCELL_VERSION} \
-  --stemcell-name ${STEMCELL_NAME}  > manifest/deployment.yml
+  --stemcell-name ${STEMCELL_OS}  > manifest/deployment.yml

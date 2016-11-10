@@ -92,13 +92,16 @@ jobs:
         run:
           path: concourse-deploy-vault/ci/tasks/deploy-vault.sh 
         params:
+          BOSH_CLIENT: {{bosh-client-id}}
+          BOSH_CLIENT_SECRET: {{bosh-client-secret}}
+          BOSH_CACERT: {{bosh-cacert}}
           BOSH_DOMAIN: {{bosh-url}}
           BOSH_USER: {{bosh-user}}
           BOSH_PASSWORD: {{bosh-pass}}
           PRODUCT_PLUGIN: {{product-plugin}}
           VAULT_IP: {{vault-ip}}
           STEMCELL_VERSION: {{stemcell-version}}
-          STEMCELL_NAME: {{stemcell-name}}
+          STEMCELL_OS: {{stemcell-os}}
           NET_NAME: {{net-name}}
           AZ_NAME: {{az-name}}
           VM_SIZE: {{vm-size}}

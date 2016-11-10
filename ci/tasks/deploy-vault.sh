@@ -53,14 +53,18 @@ if [ -z "$OMG_PATH" ]; then
     exit 1
 fi
 
+echo "found all required ENV VARS"
 
+echo "making ${OMG_PATH} executable"
 chmod +x ${OMG_PATH}
 
+
+echo "registering ${PRODUCT_PLUGIN} plugin with omg"
 ${OMG_PATH} register-plugin \
   --type product \
   --pluginpath omg-product-bundle/${PRODUCT_PLUGIN}
 
-
+echo "creating deployment for ${PRODUCT_PLUGIN}"
 ${OMG_PATH} deploy-product \
   --bosh-url ${BOSH_DOMAIN} \
   --bosh-port 25555 \
@@ -76,3 +80,5 @@ ${PRODUCT_PLUGIN} \
   --disk-type ${DISK_TYPE} \
   --stemcell-ver ${STEMCELL_VERSION} \
   --stemcell-name ${STEMCELL_OS}  > manifest/deployment.yml
+
+echo "deployment created"

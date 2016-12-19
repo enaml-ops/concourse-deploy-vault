@@ -1,3 +1,5 @@
+#!/bin/bash
+
 if [ -z "$BOSH_DOMAIN" ]; then
     echo "Need to set BOSH_DOMAIN"
     exit 1

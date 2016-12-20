@@ -23,7 +23,7 @@ export VAULT_ADDR="http://${VAULT_IP}:8200"
 echo "found all required ENV VARS"
 
 echo "running vault unseal..."
-echo "${VAULT_KEY_1}" | vault unseal 
-echo "${VAULT_KEY_2}" | vault unseal 
-echo "${VAULT_KEY_3}" | vault unseal 
+vault unseal ${VAULT_KEY_1}
+vault unseal ${VAULT_KEY_2}
+vault unseal ${VAULT_KEY_3}
 echo "Your vault unseal process is complete"

@@ -71,7 +71,6 @@ jobs:
   plan: 
     - aggregate:
       - get: concourse-deploy-vault
-        trigger: true
     - task: init-vault
       config: 
         inputs:
@@ -90,7 +89,6 @@ jobs:
   plan: 
     - aggregate:
       - get: concourse-deploy-vault
-        trigger: true
     - task: init-vault
       config: 
         inputs:

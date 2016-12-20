@@ -5,7 +5,7 @@ if [ -z "$VAULT_IP" ]; then
     exit 1
 fi
 
-VAULT_ADDR="http://${VAULT_IP}:8200"
+export VAULT_ADDR="http://${VAULT_IP}:8200"
 
 echo "found all required ENV VARS"
 

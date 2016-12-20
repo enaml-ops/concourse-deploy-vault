@@ -71,9 +71,9 @@ jobs:
       - get: concourse-deploy-vault
         trigger: true
     - task: init-vault
-      inputs:
-        - name: concourse-deploy-vault
       config: 
+        inputs:
+          - name: concourse-deploy-vault
         platform: linux
         image_resource: 
           type: docker-image

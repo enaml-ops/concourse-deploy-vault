@@ -67,7 +67,12 @@ resources:
 jobs:
 - name: init-vault
   plan: 
+    - aggregate:
+      - get: concourse-deploy-vault
+        trigger: true
     - task: init-vault
+      inputs:
+        - name: concourse-deploy-vault
       config: 
         platform: linux
         image_resource: 

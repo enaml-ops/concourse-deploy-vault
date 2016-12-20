@@ -2,42 +2,46 @@ groups:
 - name: all
   jobs:
   - deploy
+  - init-vault
 - name: deploy
   jobs:
   - deploy
+- name: init 
+  jobs:
+  - init-vault 
 
 resources:
 - name: vault-release
   type: bosh-io-release
-  check_every: 1h
+  check_every: 4h
   source:
     repository: cloudfoundry-community/vault-boshrelease
 - name: consul-release
   type: bosh-io-release
-  check_every: 1h
+  check_every: 4h
   source:
     repository: cloudfoundry-community/consul-boshrelease
 - name: stemcell
   type: bosh-io-stemcell
-  check_every: 1h
+  check_every: 4h
   source:
     force_regular: true
     name: {{stemcell-name}}
 - name: concourse-deploy-vault
   type: git
-  check_every: 1h
+  check_every: 4h
   source:
     uri: https://github.com/enaml-ops/concourse-deploy-vault
     branch: master
 - name: omg-cli
   type: github-release
-  check_every: 1h
+  check_every: 4h
   source:
     user: enaml-ops
     repository: omg-cli
 - name: omg-product-bundle
   type: github-release
-  check_every: 1h
+  check_every: 4h
   source:
     user: enaml-ops
     repository: omg-product-bundle
@@ -49,18 +53,32 @@ resources:
     client_secret: {{bosh-client-secret}}
     deployment: {{deployment-name}} 
     target: {{bosh-url}}
-- name: slack
-  type: slack-notification
-  source:
-    url: {{slack-url}}
+  #- name: slack
+  #  type: slack-notification
+  #  source:
+  #    url: {{slack-url}}
 
-resource_types:
-- name: slack-notification
-  type: docker-image
-  source:
-    repository: cfcommunity/slack-notification-resource
+  #resource_types:
+  #- name: slack-notification
+  #  type: docker-image
+  #  source:
+  #    repository: cfcommunity/slack-notification-resource
 
 jobs:
+- name: init-vault
+  plan: 
+    - task: init-vault
+      config: 
+        platform: linux
+        image_resource: 
+          type: docker-image
+          source:
+            repository: virtmerlin/deploy-worker
+        run:
+          path: concourse-deploy-vault/ci/tasks/init-vault.sh
+        params:
+          VAULT_IP: {{vault-ip}}
+
 - name: deploy
   plan:
     - aggregate:
@@ -106,7 +124,7 @@ jobs:
           AZ_NAME: {{az-name}}
           VM_SIZE: {{vm-size}}
           DISK_TYPE: {{disk-type}}
-          OMG_PATH: omg-cli/omg-linux
+          OMG_PATH: "omg-cli/omg-linux"
         inputs:
         - name: vault-release
         - name: consul-release
@@ -125,21 +143,21 @@ jobs:
         releases:
         - vault-release/*.tgz
         - consul-release/*.tgz
-      on_success:
-        put: slack
-        params:
-          text: |
-            :white_check_mark: Successfully deployed {{deployment-name}} Vault 
-            <https://$ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-          channel: {{slack-channel}}
-          username: {{slack-username}}
-          icon_url: {{slack-icon-url}}
-      on_failure:
-        put: slack
-        params:
-          text: |
-            :x: FAILED to deploy {{deployment-name}} Vault 
-            <https://$ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-          channel: {{slack-channel}}
-          username: {{slack-username}}
-          icon_url: {{slack-icon-url}}
+      #on_success:
+      #  put: slack
+      #  params:
+      #    text: |
+      #      :white_check_mark: Successfully deployed {{deployment-name}} Vault 
+      #      <https://$ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      #    channel: {{slack-channel}}
+      #    username: {{slack-username}}
+      #    icon_url: {{slack-icon-url}}
+      #on_failure:
+      #  put: slack
+      #  params:
+      #    text: |
+      #      :x: FAILED to deploy {{deployment-name}} Vault 
+      #      <https://$ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      #    channel: {{slack-channel}}
+      #    username: {{slack-username}}
+      #    icon_url: {{slack-icon-url}}
